@@ -1,24 +1,53 @@
-import { SimpleStateService } from './store';
+const jsdom = require('jsdom');
 import { User } from './models/User';
+import { UserStore } from './user-store';
 
-const fakeUser = new User('Francesco', 'De Filippis');
-const fakeUser2 = new User('Bad', 'Bunny');
+const { JSDOM } = jsdom;
+global['window'] = new JSDOM(`<!DOCTYPE html><p>Hello world</p>`, {
+  url: 'https://localhost/',
+  referrer: 'https://localhost',
+  contentType: 'text/html',
+  includeNodeLocations: true,
+  storageQuota: 5000000,
+}).window;
 
-const service = SimpleStateService.getInstance();
+const store = new UserStore();
 
-const currentUser = service.getUser();
-currentUser.subscribe((data) => console.log('####### CURRENT USER:', data));
+const fakeUser = new User({ name: 'Francesco', surname: 'De Filippis' });
+const fakeUser2 = new User({ name: 'Bad', surname: 'Bunny' });
 
-const currentUserName = service.getUserName();
-currentUserName.subscribe((data) =>
-  console.log('####### CURRENT USER NAME:', data)
+const currentUser = store.getUser();
+currentUser.subscribe((user) => {
+  console.log('####### CURRENT USER:', user);
+  console.log('####### FULL NAME:', user?.getFullName());
+});
+
+const currentUserName = store.getUserName();
+currentUserName.subscribe((name) =>
+  console.log('####### CURRENT USER NAME:', name)
 );
 
-const isLoading = service.isLoading();
-isLoading.subscribe((data) => console.log('####### IS LOADING:', data));
+const isLoading = store.isLoading();
+isLoading.subscribe((loading) => console.log('####### IS LOADING:', loading));
 
-service.setUser(fakeUser).isLoading(false);
-service.reset().setUser(fakeUser2);
+store.setUser(fakeUser).isLoading(false);
+store.reset().setUser(fakeUser2);
+
+store.unsyncFromLocalStorage();
+
+store.setUser(fakeUser);
+
+console.log(
+  '####################',
+  window.localStorage.getItem('userstore/v0')
+);
+
+store.syncToLocalStorage();
+
+console.log(
+  '####################',
+  window.localStorage.getItem('userstore/v0')
+);
 
 // null - true
 // Francesco
