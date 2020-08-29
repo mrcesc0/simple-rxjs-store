@@ -22,11 +22,6 @@ currentUser.subscribe((user) => {
   console.log('####### FULL NAME:', user?.getFullName());
 });
 
-const currentUserName = store.getUserName();
-currentUserName.subscribe((name) =>
-  console.log('####### CURRENT USER NAME:', name)
-);
-
 const isLoading = store.isLoading();
 isLoading.subscribe((loading) => console.log('####### IS LOADING:', loading));
 

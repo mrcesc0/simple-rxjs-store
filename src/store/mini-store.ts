@@ -1,7 +1,6 @@
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { pluck, tap, distinctUntilChanged } from 'rxjs/operators';
+import { tap, distinctUntilChanged, map } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
-import isEqual from 'lodash/isEqual';
 import isFunction from 'lodash/isFunction';
 
 export interface MiniStoreOptions {
@@ -54,16 +53,17 @@ export abstract class MiniStore<S> {
       ? value(this._state$, currentValue)
       : value;
 
-    if (isEqual(currentValue, newValue) === false) {
-      this._state$.next({
-        ...this._state$.getValue(),
-        [key]: newValue,
-      });
-    }
+    this._state$.next({
+      ...currentState,
+      [key]: newValue,
+    });
   }
 
-  protected get<T>(...keys: Array<string>): Observable<T | undefined> {
-    return this._state$.pipe(pluck<S, T>(...keys), distinctUntilChanged());
+  protected get<T>(
+    project: (value: S, index: number) => T,
+    compare?: (x: T, y: T) => boolean
+  ): Observable<T> {
+    return this._state$.pipe(map(project), distinctUntilChanged(compare));
   }
 
   syncToLocalStorage() {

@@ -1,18 +1,19 @@
-import { MiniStore } from './mini-store';
+import { MiniStore, MiniStoreOptions } from './mini-store';
 import { User, UserRaw } from './models/User';
-import { map } from 'rxjs/operators';
 
 interface State {
   user: UserRaw | null;
+  lastPosition: Geolocation | null;
   isLoading: boolean;
 }
 
 const DEFAULT_STATE: State = {
   user: null,
+  lastPosition: null,
   isLoading: true,
 };
 
-const OPTIONS = { storageKey: 'userstore/v0' };
+const OPTIONS: MiniStoreOptions = { storageKey: 'userstore/v0' };
 
 export class UserStore extends MiniStore<State> {
   constructor() {
@@ -20,13 +21,9 @@ export class UserStore extends MiniStore<State> {
   }
 
   getUser() {
-    return this.get<State['user']>('user').pipe(
-      map((raw) => (raw ? new User(raw) : null))
+    return this.get<User | null>((state: State) =>
+      state.user ? new User(state.user) : null
     );
-  }
-
-  getUserName() {
-    return this.get<string>('user', 'name');
   }
 
   setUser(user: User): UserStore {
@@ -38,6 +35,6 @@ export class UserStore extends MiniStore<State> {
     if (value !== undefined) {
       this.set('isLoading', value);
     }
-    return this.get<boolean>('isLoading');
+    return this.get<boolean>((state) => state.isLoading);
   }
 }
