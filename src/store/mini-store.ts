@@ -1,5 +1,5 @@
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map, pluck } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import isFunction from 'lodash/isFunction';
 
@@ -88,6 +88,18 @@ export abstract class MiniStore<S> {
     compare?: (x: T, y: T) => boolean
   ): Observable<T> {
     return this._state$.pipe(map(project), distinctUntilChanged(compare));
+  }
+
+  /**
+   * Get the value of the given key (Only first level properties)
+   * @param key The property to pluck from each source value (an object).
+   * @param compare Optional comparison function called to test if an item is distinct from the previous item in the source.
+   */
+  protected getByKey<K extends keyof S>(
+    key: K,
+    compare?: (x: S[K], y: S[K]) => boolean
+  ) {
+    return this._state$.pipe(pluck(key), distinctUntilChanged(compare));
   }
 
   /**

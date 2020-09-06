@@ -21,7 +21,7 @@ export class UserStore extends MiniStore<State> {
   }
 
   getUser() {
-    return this.get<User | null>((state: State) =>
+    return this.get((state: State) =>
       state.user ? new User(state.user) : null
     );
   }
@@ -35,6 +35,6 @@ export class UserStore extends MiniStore<State> {
     if (value !== undefined) {
       this.set('isLoading', value);
     }
-    return this.get<boolean>((state) => state.isLoading);
+    return this.getByKey('isLoading');
   }
 }
