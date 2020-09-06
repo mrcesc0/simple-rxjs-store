@@ -27,7 +27,7 @@ export class UserStore extends MiniStore<State> {
   }
 
   setUser(user: User): UserStore {
-    this.set('user', () => user.getRaw());
+    this.set('user', user.getRaw());
     return this;
   }
 
